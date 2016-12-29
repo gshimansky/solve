@@ -12,7 +12,7 @@ const DIVSPACE = 10
 func main() {
 	var err error
 	var numlines int64 = 0
-	
+
 	if len(os.Args) < 2 {
 		println("Usage solve <number of lines>")
 	} else {
@@ -41,36 +41,31 @@ th, td {
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	count := 0
-	answers := make([]int, NUM_IN_ROW * numlines)
+	answers := make([][3]int, NUM_IN_ROW * numlines)
 	for i := int64(0); i < numlines; i++ {
 		fmt.Fprint(out, "<tr>")
 		for j := 0; j < NUM_IN_ROW; j++ {
-			first := r.Intn(89) + 11
-			second := r.Intn(99)
-			var pad string = ""
-			if count + 1 < 10 {
-				pad = "&nbsp;"
-			}
-			if second < 10 {
-				fmt.Fprintf(out, `<td><code>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%d<br>
-%s%d)&nbsp;&nbsp;&nbsp;&nbsp;<u>&nbsp;&nbsp;%d</u><br>
-<br>
-<br>
-<br>
-<br>
-</code></td>`, first, pad, count + 1, second)
+			first := r.Intn(9) + 1
+			second := r.Intn(9) + 1
+			mult := first * second
+
+			if mult < 10 {
+				fmt.Fprintf(out, `<td><code>%d)</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u></br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%d)&nbsp;&nbsp;&nbsp;%d</br>
+</br>
+</br></code></td>`, count + 1, first, mult)
 			} else {
-				fmt.Fprintf(out, `<td><code>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%d<br>
-%s%d)&nbsp;&nbsp;&nbsp;&nbsp;<u>&nbsp;%d</u><br>
-<br>
-<br>
-<br>
-<br>
-</code></td>`, first, pad, count + 1, second)
+				fmt.Fprintf(out, `<td><code>%d)</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u></br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%d)&nbsp;&nbsp;%d</br>
+</br>
+</br></code></td>`, count + 1, first, mult)
 			}
-			answers[count] = first * second
+
+			answers[count][0] = mult
+			answers[count][1] = first
+			answers[count][2] = second
 			count++
 		}
 		fmt.Fprint(out, "</tr>")
@@ -78,9 +73,20 @@ th, td {
 	fmt.Fprint(out, "</table></body></html>")
 	out.Close()
 
-	out, err = os.Create("answers.txt")
+	out, err = os.Create("answers.html")
+	fmt.Fprint(out, "<html><head></head><body><tt>")
 	for i := 0; i < count; i++ {
-		fmt.Fprintf(out, "%2d) %d\n", i + 1, answers[i])
+		pad_count := ""
+		pad_first := ""
+
+		if i + 1 < 10 {
+			pad_count = "&nbsp;"
+		}
+		if answers[i][0] < 10 {
+			pad_first = "&nbsp;"
+		}
+		fmt.Fprintf(out, "%s%d) %s%d &divide; %d = %d</br>\n", pad_count, i + 1, pad_first, answers[i][0], answers[i][1], answers[i][2])
 	}
+	fmt.Fprint(out, "</tt></body></html>")
 	out.Close()
 }
