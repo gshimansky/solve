@@ -41,13 +41,14 @@ th, td {
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	count := 0
-	answers := make([][3]int, NUM_IN_ROW * numlines)
+	answers := make([][4]int, NUM_IN_ROW * numlines)
 	for i := int64(0); i < numlines; i++ {
 		fmt.Fprint(out, "<tr>")
 		for j := 0; j < NUM_IN_ROW; j++ {
 			first := r.Intn(9) + 1
 			second := r.Intn(90) + 10
-			mult := first * second
+			rem := r.Intn(first)
+			mult := first * second + rem
 			pad := ""
 
 			if mult < 10 {
@@ -57,8 +58,8 @@ th, td {
 			}
 
 			fmt.Fprintf(out, `<td><code>%d)</br>
-&nbsp;&nbsp;&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u></br>
-&nbsp;&nbsp;&nbsp;%d)&nbsp;&nbsp;%s%d</br>
+&nbsp;&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;r&nbsp;</br>
+&nbsp;&nbsp;%d)&nbsp%s%d</br>
 </br>
 </br>
 </br>
@@ -67,6 +68,7 @@ th, td {
 			answers[count][0] = mult
 			answers[count][1] = first
 			answers[count][2] = second
+			answers[count][3] = rem
 			count++
 		}
 		fmt.Fprint(out, "</tr>")
@@ -89,7 +91,7 @@ th, td {
 			pad_first = "&nbsp;"
 		}
 
-		fmt.Fprintf(out, "%s%d) %s%d &divide; %d = %2d</br>\n", pad_count, i + 1, pad_first, answers[i][0], answers[i][1], answers[i][2])
+		fmt.Fprintf(out, "%s%d) %s%d &divide; %d = %2d r %d</br>\n", pad_count, i + 1, pad_first, answers[i][0], answers[i][1], answers[i][2], answers[i][3])
 	}
 	fmt.Fprint(out, "</tt></body></html>")
 	out.Close()
