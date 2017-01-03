@@ -47,7 +47,7 @@ th, td {
 		for j := 0; j < NUM_IN_ROW; j++ {
 			first := r.Intn(9) + 1
 			second := r.Intn(9) + 1
-			rem := r.Intn(second)
+			rem := r.Intn(first)
 			mult := first * second + rem
 			pad := ""
 
