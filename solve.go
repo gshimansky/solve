@@ -12,7 +12,7 @@ const DIVSPACE = 10
 func main() {
 	var err error
 	var numlines int64 = 0
-	
+
 	if len(os.Args) < 2 {
 		println("Usage solve <number of lines>")
 	} else {
@@ -41,7 +41,7 @@ th, td {
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	count := 0
-	answers := make([]int, NUM_IN_ROW * numlines)
+	answers := make([][3]int, NUM_IN_ROW * numlines)
 	for i := int64(0); i < numlines; i++ {
 		fmt.Fprint(out, "<tr>")
 		for j := 0; j < NUM_IN_ROW; j++ {
@@ -70,7 +70,9 @@ th, td {
 <br>
 </code></td>`, first, pad, count + 1, second)
 			}
-			answers[count] = first * second
+			answers[count][0] = first
+			answers[count][1] = second
+			answers[count][2] = first * second
 			count++
 		}
 		fmt.Fprint(out, "</tr>")
@@ -78,9 +80,20 @@ th, td {
 	fmt.Fprint(out, "</table></body></html>")
 	out.Close()
 
-	out, err = os.Create("answers.txt")
+	out, err = os.Create("answers.html")
+        fmt.Fprint(out, "<html><head></head><body><tt>")
 	for i := 0; i < count; i++ {
-		fmt.Fprintf(out, "%2d) %d\n", i + 1, answers[i])
+                pad_count := ""
+                pad_second := ""
+
+                if i + 1 < 10 {
+                        pad_count = "&nbsp;"
+                }
+                if answers[i][1] < 10 {
+                        pad_second = "&nbsp;"
+                }
+                fmt.Fprintf(out, "%s%d) %d &times; %s%d = %d</br>\n", pad_count, i + 1, answers[i][0], pad_second, answers[i][1], answers[i][2])
 	}
+        fmt.Fprint(out, "</tt></body></html>")
 	out.Close()
 }
