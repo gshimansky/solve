@@ -20,13 +20,17 @@ table, th, td {
 th, td {
     padding: 15px;
 }
+.interline {
+    position: relative;
+    top: 0.5em;
+}
 </style>
 </head><body><table style="width:100%">
 {{range $index, $element := .}}
 {{if rowstart $index}}<tr>{{end}}
 <td><code>
-{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{.First}}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<sup>&times;</sup>&nbsp;<u>{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
+{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;<span class="interline">&times;</span>&nbsp;{{.First}}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
 <br>
 <br>
 <br>
