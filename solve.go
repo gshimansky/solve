@@ -11,7 +11,7 @@ import "html/template"
 const NUM_IN_ROW = 4
 
 const (
-	solveTemplate = `<html><head>
+	header = `{{define "header"}}<html><head>
 <style>
 table, th, td {
     border: 1px solid black;
@@ -25,7 +25,10 @@ th, td {
     top: 0.5em;
 }
 </style>
-</head><body><table style="width:100%">
+</head><body><h1>Generated on {{.}}</h1>{{end}}`
+
+	solveTemplate = `
+<table style="width:100%">
 {{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;<span class="interline">&times;</span>&nbsp;{{.First}}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
 <br>
@@ -34,19 +37,31 @@ th, td {
 <br>
 </code></td>
 {{if rowend $index}}</tr>
-{{end}}{{end}}</table></body></html>`
+{{end}}{{end}}</table>`
 
-	answersTemplate = `<html><head></head><body><tt>
+	answersTemplate = `<tt>
 {{range $index, $element := .}}{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
-{{end}}</tt></body></html>`
+{{end}}</tt>`
+
+	footer = `{{define "footer"}}</body></html>{{end}}`
 )
 
 type SolveData struct {
 	First, Second, Result int
 }
 
-func genTemplate(output io.Writer, t *template.Template, dataChan <-chan SolveData, wg *sync.WaitGroup) {
-	err := t.Execute(output, dataChan)
+func genTemplate(output io.Writer, t *template.Template, name string, timestr string, dataChan <-chan SolveData, wg *sync.WaitGroup) {
+	err := t.ExecuteTemplate(output, "header", timestr)
+	if err != nil {
+		panic(err)
+	}
+
+	err = t.ExecuteTemplate(output, name, dataChan)
+	if err != nil {
+		panic(err)
+	}
+
+	err = t.ExecuteTemplate(output, "footer", nil)
 	if err != nil {
 		panic(err)
 	}
@@ -87,15 +102,23 @@ func main() {
 		return
 	}
 
-	st := template.Must(template.New("solve").Funcs(funcMap).Parse(solveTemplate))
-	at := template.Must(template.New("answers").Parse(answersTemplate))
+	at := template.New("answers")
+	at = template.Must(at.Parse(answersTemplate))
+	at = template.Must(at.Parse(header))
+	at = template.Must(at.Parse(footer))
+	st := template.New("solve")
+	st = st.Funcs(funcMap)
+	st = template.Must(st.Parse(solveTemplate))
+	st = template.Must(st.Parse(header))
+	st = template.Must(st.Parse(footer))
 	toSolve := make(chan SolveData)
 	toAnswers := make(chan SolveData)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go genTemplate(solve, st, toSolve, &wg)
-	go genTemplate(answers, at, toAnswers, &wg)
+	timestr := time.Now().Format(time.RFC3339)
+	go genTemplate(solve, st, "solve", timestr, toSolve, &wg)
+	go genTemplate(answers, at, "answers", timestr, toAnswers, &wg)
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := int64(0); i < numlines * NUM_IN_ROW; i++ {
