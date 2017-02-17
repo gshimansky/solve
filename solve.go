@@ -26,25 +26,19 @@ th, td {
 }
 </style>
 </head><body><table style="width:100%">
-{{range $index, $element := .}}
-{{if rowstart $index}}<tr>{{end}}
-<td><code>
-{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;<span class="interline">&times;</span>&nbsp;{{.First}}<br>
+{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;<span class="interline">&times;</span>&nbsp;{{.First}}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
 <br>
 <br>
 <br>
 <br>
 </code></td>
-{{if rowend $index}}</tr>{{end}}
-{{end}}
-</table></body></html>`
+{{if rowend $index}}</tr>
+{{end}}{{end}}</table></body></html>`
 
 	answersTemplate = `<html><head></head><body><tt>
-{{range $index, $element := .}}
-{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
-{{end}}
-</tt></body></html>`
+{{range $index, $element := .}}{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
+{{end}}</tt></body></html>`
 )
 
 type SolveData struct {
