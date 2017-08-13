@@ -1,10 +1,10 @@
 package main
 
+import "flag"
 import "html/template"
 import "io"
 import "math/rand"
 import "os"
-import "strconv"
 import "sync"
 import "time"
 
@@ -73,7 +73,8 @@ func genTemplate(output io.Writer, t *template.Template, name string, timestr st
 
 func main() {
 	var err error
-	var numlines int64 = 0
+	numlines := flag.Int("n", 5, "number of lines")
+	flag.Parse()
 
 	fm := template.FuncMap{
 		"indexinc": func(i int) int {
@@ -85,15 +86,6 @@ func main() {
 		"rowend": func(i int) bool {
 			return (i + 1) % NUM_IN_ROW == 0
 		},
-	}
-
-	if len(os.Args) < 2 {
-		println("Usage solve <number of lines>")
-	} else {
-		if numlines, err = strconv.ParseInt(os.Args[1], 10, 32); err != nil {
-			println("Cannot parse " + os.Args[1])
-			return
-		}
 	}
 
 	solve, err := os.Create("solve.html")
@@ -127,7 +119,7 @@ func main() {
 	go genTemplate(answers, at, "answers", timestr, toAnswers, &wg)
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := int64(0); i < numlines * NUM_IN_ROW; i++ {
+	for i := 0; i < *numlines * NUM_IN_ROW; i++ {
 		first := r.Intn(999)
 		second := r.Intn(999)
 		data := SolveData{
