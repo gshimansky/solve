@@ -29,8 +29,10 @@ th, td {
 
 	solveTemplate = `
 <table style="width:100%">
-{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;&nbsp;&nbsp;<span class="interline">&times;</span>&nbsp;{{.First}}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
+{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;<span class="interline">&times;</span>&nbsp;&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
+<br>
+<br>
 <br>
 <br>
 <br>
@@ -40,7 +42,7 @@ th, td {
 {{end}}{{end}}</table>`
 
 	answersTemplate = `<tt>
-{{range $index, $element := .}}{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
+{{range $index, $element := .}}{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
 {{end}}</tt>`
 
 	footer = `{{define "footer"}}</body></html>{{end}}`
@@ -122,8 +124,8 @@ func main() {
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := int64(0); i < numlines * NUM_IN_ROW; i++ {
-		first := r.Intn(89) + 11
-		second := r.Intn(99)
+		first := r.Intn(999)
+		second := r.Intn(999)
 		data := SolveData{
 			First: first,
 			Second: second,
