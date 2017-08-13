@@ -98,7 +98,7 @@ func main() {
 	}
 	answers, err := os.Create("answers.html")
 	if err != nil {
-		println("Cannot write solve.html")
+		println("Cannot write answers.html")
 		return
 	}
 
