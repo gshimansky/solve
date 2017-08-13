@@ -1,12 +1,12 @@
 package main
 
-import "os"
+import "html/template"
 import "io"
-import "time"
+import "math/rand"
+import "os"
 import "strconv"
 import "sync"
-import "math/rand"
-import "html/template"
+import "time"
 
 const NUM_IN_ROW = 4
 
@@ -29,7 +29,7 @@ th, td {
 
 	solveTemplate = `
 <table style="width:100%">
-{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;<span class="interline">&times;</span>&nbsp;&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}<br>
+{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;<span class="interline">&times;</span>&nbsp;&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
 <br>
 <br>
@@ -42,7 +42,7 @@ th, td {
 {{end}}{{end}}</table>`
 
 	answersTemplate = `<tt>
-{{range $index, $element := .}}{{if lt $index 10}}&nbsp;{{end}}{{$index}})&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
+{{range $index, $element := .}}{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
 {{end}}</tt>`
 
 	footer = `{{define "footer"}}</body></html>{{end}}`
@@ -75,7 +75,10 @@ func main() {
 	var err error
 	var numlines int64 = 0
 
-	funcMap := template.FuncMap{
+	fm := template.FuncMap{
+		"indexinc": func(i int) int {
+			return i + 1
+		},
 		"rowstart": func(i int) bool {
 			return i % NUM_IN_ROW == 0
 		},
@@ -105,11 +108,12 @@ func main() {
 	}
 
 	at := template.New("answers")
+	at = at.Funcs(fm)
 	at = template.Must(at.Parse(answersTemplate))
 	at = template.Must(at.Parse(header))
 	at = template.Must(at.Parse(footer))
 	st := template.New("solve")
-	st = st.Funcs(funcMap)
+	st = st.Funcs(fm)
 	st = template.Must(st.Parse(solveTemplate))
 	st = template.Must(st.Parse(header))
 	st = template.Must(st.Parse(footer))
