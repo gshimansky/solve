@@ -29,7 +29,7 @@ th, td {
 
 	solveTemplate = `
 <table style="width:100%">
-{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;<span class="interline">&times;</span>&nbsp;&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}<br>
+{{range $index, $element := .}}{{if rowstart $index}}<tr>{{end}}<td><code>{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;<span class="interline">{{if .Add}}+{{else}}-{{end}}</span>&nbsp;&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}&nbsp;{{.Second}}</u><br>
 <br>
 <br>
@@ -42,7 +42,7 @@ th, td {
 {{end}}{{end}}</table>`
 
 	answersTemplate = `<tt>
-{{range $index, $element := .}}{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}&nbsp;&times;&nbsp;{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{.Result}}</br>
+{{range $index, $element := .}}{{if lt (indexinc $index) 10}}&nbsp;{{end}}{{indexinc $index}})&nbsp;{{if lt .First 100}}&nbsp;{{end}}{{if lt .First 10}}&nbsp;{{end}}{{.First}}&nbsp;{{if .Add}}&#xff0b;{{else}}&#xFF0D;{{end}}&nbsp;{{if lt .Second 100}}&nbsp;{{end}}{{if lt .Second 10}}&nbsp;{{end}}{{.Second}} = {{if lt .Result 100}}&nbsp;{{end}}{{if lt .Result 10}}&nbsp;{{end}}{{.Result}}</br>
 {{end}}</tt>`
 
 	footer = `{{define "footer"}}</body></html>{{end}}`
@@ -50,6 +50,7 @@ th, td {
 
 type SolveData struct {
 	First, Second, Result int
+	Add bool
 }
 
 func genTemplate(output io.Writer, t *template.Template, name string, timestr string, dataChan <-chan SolveData, wg *sync.WaitGroup) {
@@ -120,15 +121,27 @@ func main() {
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < *numlines * NUM_IN_ROW; i++ {
-		first := r.Intn(999)
-		second := r.Intn(999)
+		first := r.Intn(100)
+		second := r.Intn(100)
+		add := r.Intn(2) == 0
+		result := 0
+		if add {
+			result = first + second
+		} else {
+			if first < second {
+				first, second = second, first
+			}
+			result = first - second
+		}
 		data := SolveData{
 			First: first,
 			Second: second,
-			Result: first * second,
+			Result: result,
+			Add: add,
 		}
 		toSolve <- data
 		toAnswers <- data
+		println("Doing cell", i)
 	}
 	close(toSolve)
 	close(toAnswers)
